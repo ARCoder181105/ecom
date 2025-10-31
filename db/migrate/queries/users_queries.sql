@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users (first_name, last_name, email, password)
-VALUES ($1, $2, $3, $4)
+INSERT INTO users (first_name, last_name, username, email, password)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
 -- name: GetUserByID :one
@@ -21,7 +21,8 @@ ORDER BY created_at DESC;
 UPDATE users
 SET first_name = $2,
     last_name = $3,
-    email = $4
+    username = $4,
+    email = $5
 WHERE id = $1
 RETURNING *;
 
