@@ -78,6 +78,7 @@ func handleRegister(q *db.Queries) http.HandlerFunc {
 		}
 
 		// Success response
+		//with Json
 		respond.RespondWithJSON(w, http.StatusCreated, map[string]interface{}{
 			"message": "User registered successfully",
 			"user": mytypes.UserResponse{
