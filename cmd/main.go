@@ -9,16 +9,15 @@ import (
 )
 
 func main() {
-	
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("⚠️  No .env file found, using system environment")
 	}
 
 	port := os.Getenv("PORT")
-	
 
-	server := api.NewAPIServer(":"+port)
+	server := api.NewAPIServer(":" + port)
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}

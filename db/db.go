@@ -9,7 +9,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-
 func NewPostgresStorage() (*sql.DB, error) {
 
 	connStr := os.Getenv("DATABASE_URL")
