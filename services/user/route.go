@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	db "github.com/ARCoder181105/ecom/db/migrate/sqlc"
-	"github.com/ARCoder181105/ecom/utils"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -23,9 +22,4 @@ func Routes(database *sql.DB) chi.Router {
 	})
 
 	return r
-}
-
-func handleLogin(w http.ResponseWriter, r *http.Request, q *db.Queries) {
-	// TODO: Implement login logic
-	utils.RespondWithJSON(w, http.StatusNotImplemented, map[string]string{"message": "Login not yet implemented"})
 }
