@@ -9,7 +9,6 @@ type contextKey string
 
 var ClaimsContextKey = contextKey("jwtClaims")
 
-// Works directly with http.Handle("/", AuthMiddleware(handler))
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
