@@ -27,3 +27,11 @@ func ParseJson(r *http.Request, payload any) error {
 
 	return json.NewDecoder(r.Body).Decode(payload)
 }
+
+func GetClaims(r *http.Request) (*Claims, error) {
+	claims, ok := r.Context().Value(ClaimsContextKey).(*Claims)
+	if !ok {
+		return nil, fmt.Errorf("claims not found in context")
+	}
+	return claims, nil
+}
