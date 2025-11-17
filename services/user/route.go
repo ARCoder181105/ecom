@@ -5,15 +5,14 @@ import (
 	"database/sql"
 	"net/http"
 
-	db "github.com/ARCoder181105/ecom/db/migrate/sqlc"
-	// "github.com/ARCoder181105/ecom/utils"
+	database "github.com/ARCoder181105/ecom/db/migrate/sqlc"
 	"github.com/go-chi/chi/v5"
 )
 
 // Routes sets up all user-related API endpoints.
-func Routes(database *sql.DB) chi.Router {
+func Routes(db *sql.DB) chi.Router {
 	r := chi.NewRouter()
-	q := db.New(database)
+	q := database.New(db)
 
 	// Public routes
 	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {

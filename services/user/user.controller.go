@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"net/http"
 
-	db "github.com/ARCoder181105/ecom/db/migrate/sqlc"
+	database "github.com/ARCoder181105/ecom/db/migrate/sqlc"
 	mytypes "github.com/ARCoder181105/ecom/types"
 	"github.com/ARCoder181105/ecom/utils"
 	"golang.org/x/crypto/bcrypt"
@@ -32,7 +32,7 @@ func setAccessTokenCookie(w http.ResponseWriter, userID, email string) (string, 
 }
 
 // 2. Capitalize the function name to export it
-func handleRegister(w http.ResponseWriter, r *http.Request, q *db.Queries) {
+func handleRegister(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 	// Parse the request payload correctly using &payload
 	var payload mytypes.RegisterUserPayload
 	if err := utils.ParseJson(r, &payload); err != nil {
@@ -59,7 +59,7 @@ func handleRegister(w http.ResponseWriter, r *http.Request, q *db.Queries) {
 	}
 
 	// Create user in DB
-	user, err := q.CreateUser(context.Background(), db.CreateUserParams{
+	user, err := q.CreateUser(context.Background(), database.CreateUserParams{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Username:  payload.Username,
@@ -94,7 +94,7 @@ func handleRegister(w http.ResponseWriter, r *http.Request, q *db.Queries) {
 	})
 }
 
-func handleLogin(w http.ResponseWriter, r *http.Request, q *db.Queries) {
+func handleLogin(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 	var loginUserPayload mytypes.LoginUserPayload
 
 	if err := utils.ParseJson(r, &loginUserPayload); err != nil {

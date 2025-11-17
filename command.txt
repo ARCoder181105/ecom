@@ -1,0 +1,1 @@
+goose -dir . postgres "postgresql://postgres:123456789@localhost:5432/ecomdb?sslmode=disable" up
