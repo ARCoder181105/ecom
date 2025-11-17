@@ -23,3 +23,13 @@ type LoginUserPayload struct {
 	Email    string `json:"email"`
 	PassWord string `json:"password"`
 }
+
+type ProductResponse struct {
+	ID            string    `json:"id"`
+	Name          string    `json:"name"`
+	Description   string    `json:"description"`
+	Image         string    `json:"image"`
+	Price         float64   `json:"price"`
+	StockQuantity int       `json:"stock_quantity"`
+	CreatedAt     time.Time `json:"created_at"`
+}

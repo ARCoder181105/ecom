@@ -5,16 +5,29 @@ import (
 	"net/http"
 
 	database "github.com/ARCoder181105/ecom/db/migrate/sqlc"
+	mytypes "github.com/ARCoder181105/ecom/types"
 	"github.com/ARCoder181105/ecom/utils"
 )
 
-func handleGetAllProducts(w http.ResponseWriter, r *http.Request, q *database.Queries) {
+func handleGetAllProducts(w http.ResponseWriter, _ *http.Request, q *database.Queries) {
 	data, err := q.ListProducts(context.Background())
 	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, err)
+		http.Error(w, "Unable to list products", http.StatusInternalServerError)
 		return
 	}
 
-	
+	var responseProducts []mytypes.ProductResponse
 
+	for _, row := range data {
+		responseProducts = append(responseProducts, mytypes.ProductResponse{
+			ID:            row.ID.String(),
+			Name:          row.Name,
+			Description:   row.Description,
+			Price:         utils.ParsePrice(row.Price),
+			StockQuantity: int(row.StockQuantity),
+			CreatedAt:     row.CreatedAt,
+		})
+	}
+
+	utils.RespondWithJSON(w, http.StatusOK, responseProducts)
 }
