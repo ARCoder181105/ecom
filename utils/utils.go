@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 func RespondWithJSON(w http.ResponseWriter, status int, data any) {
@@ -37,10 +36,10 @@ func GetClaims(r *http.Request) (*Claims, error) {
 	return claims, nil
 }
 
-func ParsePrice(priceStr string) float64 {
-	price, err := strconv.ParseFloat(priceStr, 64)
-	if err != nil {
-		return 0.0
-	}
-	return price
-}
+// func ParsePrice(priceStr string) float64 {
+// 	price, err := strconv.ParseFloat(priceStr, 64)
+// 	if err != nil {
+// 		return 0.0
+// 	}
+// 	return price
+// }

@@ -7,3 +7,7 @@ sql:
       go:
         package: "database"
         out: "db/migrate/sqlc"
+        overrides:
+          # This is the "full name" of the type
+          - db_type: "pg_catalog.numeric"
+            go_type: "github.com/shopspring/decimal.Decimal"

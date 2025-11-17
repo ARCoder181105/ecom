@@ -10,6 +10,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 const createProduct = `-- name: CreateProduct :one
@@ -22,7 +23,7 @@ type CreateProductParams struct {
 	Name          string
 	Description   string
 	Image         sql.NullString
-	Price         string
+	Price         decimal.Decimal
 	StockQuantity int32
 }
 
@@ -131,7 +132,7 @@ type UpdateProductParams struct {
 	Name          string
 	Description   string
 	Image         sql.NullString
-	Price         string
+	Price         decimal.Decimal
 	StockQuantity int32
 }
 

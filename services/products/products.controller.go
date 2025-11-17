@@ -23,7 +23,7 @@ func handleGetAllProducts(w http.ResponseWriter, _ *http.Request, q *database.Qu
 			ID:            row.ID.String(),
 			Name:          row.Name,
 			Description:   row.Description,
-			Price:         utils.ParsePrice(row.Price),
+			Price:         row.Price.String(), 
 			StockQuantity: int(row.StockQuantity),
 			CreatedAt:     row.CreatedAt,
 		})

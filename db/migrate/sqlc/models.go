@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 type Product struct {
@@ -16,7 +17,7 @@ type Product struct {
 	Name          string
 	Description   string
 	Image         sql.NullString
-	Price         string
+	Price         decimal.Decimal
 	StockQuantity int32
 	CreatedAt     time.Time
 }
