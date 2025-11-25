@@ -8,6 +8,7 @@ import (
 	database "github.com/ARCoder181105/ecom/db/migrate/sqlc"
 	mytypes "github.com/ARCoder181105/ecom/types"
 	"github.com/ARCoder181105/ecom/utils"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -31,7 +32,6 @@ func setAccessTokenCookie(w http.ResponseWriter, userID, email string) (string, 
 	return token, nil
 }
 
-// 2. Capitalize the function name to export it
 func handleRegister(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 	// Parse the request payload correctly using &payload
 	var payload mytypes.RegisterUserPayload
@@ -139,3 +139,35 @@ func handleLogin(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 		},
 	})
 }
+
+func handleProfile(w http.ResponseWriter, r *http.Request, q *database.Queries) {
+	claims, err := utils.GetClaims(r)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	userId := claims.UserID
+
+	userUUID, err := uuid.Parse(userId)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	user, err := q.GetUserByID(context.Background(), userUUID)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusNotFound, err)
+		return
+	}
+
+	utils.RespondWithJSON(w, http.StatusOK, mytypes.UserResponse{
+		ID:        user.ID.String(),
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	})
+}
+

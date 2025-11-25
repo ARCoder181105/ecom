@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	database "github.com/ARCoder181105/ecom/db/migrate/sqlc"
+	"github.com/ARCoder181105/ecom/utils"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -24,17 +25,17 @@ func Routes(db *sql.DB) chi.Router {
 	})
 
 	// Protected routes
-	// r.Group(func(pr chi.Router) {
-	// 	pr.Use(utils.AuthMiddleware)
+	r.Group(func(pr chi.Router) {
+		pr.Use(utils.AuthMiddleware)
 
-	// 	pr.Get("/profile", func(w http.ResponseWriter, r *http.Request) {
-	// 		handleProfile(w, r, q)
-	// 	})
+		pr.Get("/profile", func(w http.ResponseWriter, r *http.Request) {
+			handleProfile(w, r, q)
+		})
 
-	// 	pr.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
-	// 		handleOrders(w, r, q)
-	// 	})
-	// })
+		// pr.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
+		// 	handleOrders(w, r, q)
+		// })
+	})
 
 	return r
 }

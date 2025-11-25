@@ -10,6 +10,7 @@ import (
 	"github.com/ARCoder181105/ecom/services/products"
 	"github.com/ARCoder181105/ecom/services/user"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type APIServer struct {
@@ -33,6 +34,10 @@ func (s *APIServer) Run() error {
 	log.Println("✅ Database connection established")
 
 	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	r.Route("/api/v1", func(api chi.Router) {
 		api.Mount("/user", user.Routes(s.db))
