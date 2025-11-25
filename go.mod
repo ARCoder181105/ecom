@@ -14,4 +14,12 @@ require github.com/google/uuid v1.6.0
 
 require github.com/golang-jwt/jwt/v5 v5.3.0
 
-require github.com/shopspring/decimal v1.4.0
+require (
+	github.com/cloudinary/cloudinary-go/v2 v2.14.0
+	github.com/shopspring/decimal v1.4.0
+)
+
+require (
+	github.com/creasty/defaults v1.7.0 // indirect
+	github.com/gorilla/schema v1.4.1 // indirect
+)

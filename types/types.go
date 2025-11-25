@@ -33,3 +33,11 @@ type ProductResponse struct {
 	StockQuantity int       `json:"stock_quantity"`
 	CreatedAt     time.Time `json:"created_at"`
 }
+
+type CreateProductPayload struct {
+	Name          string `json:"name"`
+	Description   string `json:"description"`
+	Image         string `json:"image"`
+	Price         string `json:"price"` 
+	StockQuantity int    `json:"stock_quantity"`
+}

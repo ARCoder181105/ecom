@@ -17,5 +17,11 @@ func Routes(db *sql.DB) chi.Router {
 		handleGetAllProducts(w, r, q)
 	})
 
+	r.Post("/upload", handleImageUpload)
+
+	r.Post("/create", func(w http.ResponseWriter, r *http.Request) {
+		handleCreateProduct(w, r, q)
+	})
+
 	return r
 }
