@@ -13,8 +13,8 @@ import (
 )
 
 // Internal function to generate and set access token
-func setAccessTokenCookie(w http.ResponseWriter, userID, email string) (string, error) {
-	token, err := utils.GenerateJWT(userID, email)
+func setAccessTokenCookie(w http.ResponseWriter, userID, email string, role string) (string, error) {
+	token, err := utils.GenerateJWT(userID, email, role)
 	if err != nil {
 		return "", err
 	}
@@ -63,6 +63,7 @@ func handleRegister(w http.ResponseWriter, r *http.Request, q *database.Queries)
 		Username:  payload.Username,
 		Email:     payload.Email,
 		Password:  string(hashedPassword),
+		Role:      database.UserRoleCustomer,
 	})
 	if err != nil {
 		utils.RespondWithJSON(w, 400, map[string]string{
@@ -72,7 +73,7 @@ func handleRegister(w http.ResponseWriter, r *http.Request, q *database.Queries)
 		return
 	}
 
-	token, err := setAccessTokenCookie(w, user.ID.String(), user.Email)
+	token, err := setAccessTokenCookie(w, user.ID.String(), user.Email, string(user.Role))
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err)
 		return
@@ -117,7 +118,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 	}
 
 	// Generate and set JWT token
-	token, err := setAccessTokenCookie(w, user.ID.String(), user.Email)
+	token, err := setAccessTokenCookie(w, user.ID.String(), user.Email, string(user.Role))
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err)
 		return
@@ -167,4 +168,3 @@ func handleProfile(w http.ResponseWriter, r *http.Request, q *database.Queries) 
 		CreatedAt: user.CreatedAt,
 	})
 }
-

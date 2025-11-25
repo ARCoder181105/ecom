@@ -25,6 +25,14 @@ SET
 WHERE id = $1 AND user_id = $7
 RETURNING *;
 
--- name: DeleteProduct :exec
+-- name: DeleteProduct :one
+-- Used by Sellers/Customers: Deletes only if they own it
 DELETE FROM products
-WHERE id = $1 AND user_id = $2;
+WHERE id = $1 AND user_id = $2
+RETURNING id;
+
+-- name: DeleteProductByAdmin :one
+-- Used by Admins: Deletes by ID (ignores ownership)
+DELETE FROM products
+WHERE id = $1
+RETURNING id;

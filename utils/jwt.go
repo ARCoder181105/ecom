@@ -13,15 +13,18 @@ var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 type Claims struct {
 	UserID string `json:"user_id"`
 	Email  string `json:"email"`
+	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userId, email string) (string, error) {
+// Update function signature to accept role
+func GenerateJWT(userID, email, role string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 
 	claim := &Claims{
-		UserID: userId,
+		UserID: userID,
 		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
@@ -29,7 +32,7 @@ func GenerateJWT(userId, email string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-	return token.SignedString(jwtSecret) // string,err
+	return token.SignedString(jwtSecret)
 }
 
 func ValidateJWT(tokenString string) (*Claims, error) {

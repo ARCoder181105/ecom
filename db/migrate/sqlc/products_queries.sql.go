@@ -53,9 +53,10 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
-const deleteProduct = `-- name: DeleteProduct :exec
+const deleteProduct = `-- name: DeleteProduct :one
 DELETE FROM products
 WHERE id = $1 AND user_id = $2
+RETURNING id
 `
 
 type DeleteProductParams struct {
@@ -63,9 +64,25 @@ type DeleteProductParams struct {
 	UserID uuid.UUID
 }
 
-func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) error {
-	_, err := q.db.ExecContext(ctx, deleteProduct, arg.ID, arg.UserID)
-	return err
+// Used by Sellers/Customers: Deletes only if they own it
+func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, deleteProduct, arg.ID, arg.UserID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteProductByAdmin = `-- name: DeleteProductByAdmin :one
+DELETE FROM products
+WHERE id = $1
+RETURNING id
+`
+
+// Used by Admins: Deletes by ID (ignores ownership)
+func (q *Queries) DeleteProductByAdmin(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, deleteProductByAdmin, id)
+	err := row.Scan(&id)
+	return id, err
 }
 
 const getProductByID = `-- name: GetProductByID :one

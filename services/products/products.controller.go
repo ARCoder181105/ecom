@@ -39,7 +39,6 @@ func handleGetAllProducts(w http.ResponseWriter, _ *http.Request, q *database.Qu
 	utils.RespondWithJSON(w, http.StatusOK, responseProducts)
 }
 
-
 func handleGetProductByID(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 	productIDStr := chi.URLParam(r, "productID")
 
@@ -88,6 +87,12 @@ func handleCreateProduct(w http.ResponseWriter, r *http.Request, q *database.Que
 		utils.RespondWithError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized"))
 		return
 	}
+
+	if claims.Role != "seller" && claims.Role != "admin" {
+		utils.RespondWithError(w, http.StatusForbidden, fmt.Errorf("only sellers can create products"))
+		return
+	}
+
 	userID, _ := uuid.Parse(claims.UserID)
 
 	// Validate price
@@ -171,27 +176,41 @@ func handleDeleteProduct(w http.ResponseWriter, r *http.Request, q *database.Que
 	productID, err := uuid.Parse(productIDStr)
 
 	if err != nil {
-		utils.RespondWithError(w, http.StatusBadRequest, fmt.Errorf("invalid product id"))
+		utils.RespondWithError(w, http.StatusBadRequest, fmt.Errorf("invalid product ID"))
 		return
 	}
 
+	// 1. Get User Claims (ID and Role)
 	claims, err := utils.GetClaims(r)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized"))
 		return
 	}
-	userID, _ := uuid.Parse(claims.UserID)
 
-	err = q.DeleteProduct(context.Background(), database.DeleteProductParams{
-		ID:     productID,
-		UserID: userID,
-	})
+	// 2. Determine which Query to use based on Role
+	if claims.Role == "admin" {
+		// --- ADMIN PATH ---
+		_, err = q.DeleteProductByAdmin(context.Background(), productID)
 
-	if err == sql.ErrNoRows {
-		utils.RespondWithError(w, http.StatusForbidden, fmt.Errorf("you do not own this product"))
-		return
+		if err == sql.ErrNoRows {
+			utils.RespondWithError(w, http.StatusNotFound, fmt.Errorf("product not found"))
+			return
+		}
+	} else {
+		// --- SELLER/USER PATH ---
+		userID, _ := uuid.Parse(claims.UserID)
+		_, err = q.DeleteProduct(context.Background(), database.DeleteProductParams{
+			ID:     productID,
+			UserID: userID,
+		})
+
+		if err == sql.ErrNoRows {
+			utils.RespondWithError(w, http.StatusForbidden, fmt.Errorf("you do not own this product"))
+			return
+		}
 	}
 
+	// 3. Handle Database Errors (Connection issues, etc.)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err)
 		return
