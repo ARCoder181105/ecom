@@ -5,13 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"path/filepath"
-	"strings"
 
 	database "github.com/ARCoder181105/ecom/db/migrate/sqlc"
 	mytypes "github.com/ARCoder181105/ecom/types"
 	"github.com/ARCoder181105/ecom/utils"
-	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 )
 
@@ -38,37 +35,6 @@ func handleGetAllProducts(w http.ResponseWriter, _ *http.Request, q *database.Qu
 	utils.RespondWithJSON(w, http.StatusOK, responseProducts)
 }
 
-func handleImageUpload(w http.ResponseWriter, r *http.Request) {
-
-	// 1. Parse Multipart Form (Max 10MB)
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		utils.RespondWithError(w, http.StatusBadRequest, fmt.Errorf("file too big"))
-		return
-	}
-
-	// 2. Retrieve the file
-	file, handler, err := r.FormFile("image")
-	if err != nil {
-		utils.RespondWithError(w, http.StatusBadRequest, fmt.Errorf("invalid file"))
-		return
-	}
-	defer file.Close()
-
-	// 3. Generate a unique filename to prevent overwrites
-	fileExt := filepath.Ext(handler.Filename)
-	uniqueFileName := fmt.Sprintf("%s-%s", uuid.New().String(), strings.TrimSuffix(handler.Filename, fileExt))
-
-	// 4. Upload to Cloudinary
-	imageUrl, err := utils.UploadToCloudinary(file, uniqueFileName)
-	if err != nil {
-		utils.RespondWithError(w, http.StatusInternalServerError, err)
-		return
-	}
-
-	// 5. Return the URL
-	utils.RespondWithJSON(w, http.StatusOK, map[string]string{"image_url": imageUrl})
-}
-
 func handleCreateProduct(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 	var payload mytypes.CreateProductPayload
 
@@ -87,8 +53,8 @@ func handleCreateProduct(w http.ResponseWriter, r *http.Request, q *database.Que
 
 	// 3. Insert into Database
 	product, err := q.CreateProduct(context.Background(), database.CreateProductParams{
-		Name:        payload.Name,
-		Description: payload.Description,
+		Name:          payload.Name,
+		Description:   payload.Description,
 		Image:         sql.NullString{String: payload.Image, Valid: payload.Image != ""},
 		Price:         price,
 		StockQuantity: int32(payload.StockQuantity),

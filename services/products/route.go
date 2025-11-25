@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	database "github.com/ARCoder181105/ecom/db/migrate/sqlc"
+	"github.com/ARCoder181105/ecom/utils"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -17,7 +18,9 @@ func Routes(db *sql.DB) chi.Router {
 		handleGetAllProducts(w, r, q)
 	})
 
-	r.Post("/upload", handleImageUpload)
+	r.Post("/upload", func(w http.ResponseWriter, r *http.Request) {
+		utils.HandleImageUpload(w, r)
+	})
 
 	r.Post("/create", func(w http.ResponseWriter, r *http.Request) {
 		handleCreateProduct(w, r, q)
