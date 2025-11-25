@@ -20,6 +20,7 @@ type Product struct {
 	Price         decimal.Decimal
 	StockQuantity int32
 	CreatedAt     time.Time
+	UserID        uuid.UUID
 }
 
 type User struct {

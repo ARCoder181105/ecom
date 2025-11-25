@@ -18,12 +18,28 @@ func Routes(db *sql.DB) chi.Router {
 		handleGetAllProducts(w, r, q)
 	})
 
-	r.Post("/upload", func(w http.ResponseWriter, r *http.Request) {
-		utils.HandleImageUpload(w, r)
+	r.Get("/getProduct/{productId}", func(w http.ResponseWriter, r *http.Request) {
+		handleGetProductByID(w, r, q)
 	})
 
-	r.Post("/create", func(w http.ResponseWriter, r *http.Request) {
-		handleCreateProduct(w, r, q)
+	r.Group(func(admin chi.Router) {
+		admin.Use(utils.AuthMiddleware) // just make sure only verfied user can delete and update
+
+		admin.Post("/create", func(w http.ResponseWriter, r *http.Request) {
+			handleCreateProduct(w, r, q)
+		})
+
+		r.Post("/upload", func(w http.ResponseWriter, r *http.Request) {
+			utils.HandleImageUpload(w, r)
+		})
+
+		admin.Put("/{productID}", func(w http.ResponseWriter, r *http.Request) {
+			handleUpdateProduct(w, r, q)
+		})
+
+		admin.Delete("/{productID}", func(w http.ResponseWriter, r *http.Request) {
+			handleDeleteProduct(w, r, q)
+		})
 	})
 
 	return r

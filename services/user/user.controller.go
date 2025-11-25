@@ -40,8 +40,6 @@ func handleRegister(w http.ResponseWriter, r *http.Request, q *database.Queries)
 		return
 	}
 
-	defer r.Body.Close()
-
 	_, err := q.GetUserByEmail(context.Background(), payload.Email)
 	if err == nil {
 		utils.RespondWithJSON(w, 400, map[string]string{"message": "User already exists"})
@@ -101,7 +99,6 @@ func handleLogin(w http.ResponseWriter, r *http.Request, q *database.Queries) {
 		utils.RespondWithError(w, http.StatusBadRequest, err)
 		return
 	}
-	defer r.Body.Close()
 
 	user, err := q.GetUserByEmail(context.Background(), loginUserPayload.Email)
 	if err == sql.ErrNoRows {

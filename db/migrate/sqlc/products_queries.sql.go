@@ -14,9 +14,11 @@ import (
 )
 
 const createProduct = `-- name: CreateProduct :one
-INSERT INTO products (name, description, image, price, stock_quantity)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, name, description, image, price, stock_quantity, created_at
+INSERT INTO products (
+    name, description, image, price, stock_quantity, user_id
+)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, name, description, image, price, stock_quantity, created_at, user_id
 `
 
 type CreateProductParams struct {
@@ -25,6 +27,7 @@ type CreateProductParams struct {
 	Image         sql.NullString
 	Price         decimal.Decimal
 	StockQuantity int32
+	UserID        uuid.UUID
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -34,6 +37,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.Image,
 		arg.Price,
 		arg.StockQuantity,
+		arg.UserID,
 	)
 	var i Product
 	err := row.Scan(
@@ -44,22 +48,28 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.Price,
 		&i.StockQuantity,
 		&i.CreatedAt,
+		&i.UserID,
 	)
 	return i, err
 }
 
 const deleteProduct = `-- name: DeleteProduct :exec
 DELETE FROM products
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
 `
 
-func (q *Queries) DeleteProduct(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteProduct, id)
+type DeleteProductParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) error {
+	_, err := q.db.ExecContext(ctx, deleteProduct, arg.ID, arg.UserID)
 	return err
 }
 
 const getProductByID = `-- name: GetProductByID :one
-SELECT id, name, description, image, price, stock_quantity, created_at FROM products
+SELECT id, name, description, image, price, stock_quantity, created_at, user_id FROM products
 WHERE id = $1
 LIMIT 1
 `
@@ -75,12 +85,13 @@ func (q *Queries) GetProductByID(ctx context.Context, id uuid.UUID) (Product, er
 		&i.Price,
 		&i.StockQuantity,
 		&i.CreatedAt,
+		&i.UserID,
 	)
 	return i, err
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, name, description, image, price, stock_quantity, created_at FROM products
+SELECT id, name, description, image, price, stock_quantity, created_at, user_id FROM products
 ORDER BY created_at DESC
 `
 
@@ -101,6 +112,7 @@ func (q *Queries) ListProducts(ctx context.Context) ([]Product, error) {
 			&i.Price,
 			&i.StockQuantity,
 			&i.CreatedAt,
+			&i.UserID,
 		); err != nil {
 			return nil, err
 		}
@@ -123,8 +135,8 @@ SET
     image = $4,
     price = $5,
     stock_quantity = $6
-WHERE id = $1
-RETURNING id, name, description, image, price, stock_quantity, created_at
+WHERE id = $1 AND user_id = $7
+RETURNING id, name, description, image, price, stock_quantity, created_at, user_id
 `
 
 type UpdateProductParams struct {
@@ -134,6 +146,7 @@ type UpdateProductParams struct {
 	Image         sql.NullString
 	Price         decimal.Decimal
 	StockQuantity int32
+	UserID        uuid.UUID
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error) {
@@ -144,6 +157,7 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		arg.Image,
 		arg.Price,
 		arg.StockQuantity,
+		arg.UserID,
 	)
 	var i Product
 	err := row.Scan(
@@ -154,6 +168,7 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		&i.Price,
 		&i.StockQuantity,
 		&i.CreatedAt,
+		&i.UserID,
 	)
 	return i, err
 }
