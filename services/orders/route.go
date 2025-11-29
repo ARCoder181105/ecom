@@ -20,6 +20,10 @@ func Routes(db *sql.DB) chi.Router {
 			handleUserOrders(w, r, q)
 		})
 
+		r.Post("/placeOrder", func(w http.ResponseWriter, r *http.Request) {
+			handlePlaceOrder(w, r, db)
+		})
+
 	})
 
 	return r

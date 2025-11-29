@@ -42,3 +42,8 @@ type CreateProductPayload struct {
 	Price         string `json:"price"`
 	StockQuantity int    `json:"stock_quantity"`
 }
+
+type CreateOrderPayload struct {
+	ProductID string `json:"product_id"`
+	Quantity  int    `json:"quantity"`
+}
