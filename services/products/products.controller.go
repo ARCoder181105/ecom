@@ -14,16 +14,46 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func handleGetAllProducts(w http.ResponseWriter, _ *http.Request, q *database.Queries) {
-	data, err := q.ListProducts(context.Background())
+func handleGetAllProducts(w http.ResponseWriter, r *http.Request, q *database.Queries) {
+
+	pageStr := r.URL.Query().Get("page")
+	limitStr := r.URL.Query().Get("limit")
+	search := r.URL.Query().Get("search")
+
+	page := 1
+	limit := 10
+	if pageStr != "" {
+		fmt.Sscanf(pageStr, "%d", &page)
+	}
+	if limitStr != "" {
+		fmt.Sscanf(limitStr, "%d", &limit)
+	}
+	if page < 1 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
+	
+	params := database.ListProductsParams{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+		Column3: sql.NullString{String: search, Valid: true}, 
+	}
+
+	products, err := q.ListProducts(context.Background(), params)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to list products"))
 		return
 	}
 
-	var responseProducts []mytypes.ProductResponse
+	totalCount, err := q.CountProducts(context.Background(), sql.NullString{String: search, Valid: true})
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, fmt.Errorf("error counting products"))
+		return
+	}
 
-	for _, row := range data {
+	var responseProducts []mytypes.ProductResponse
+	for _, row := range products {
 		responseProducts = append(responseProducts, mytypes.ProductResponse{
 			ID:            row.ID.String(),
 			Name:          row.Name,
@@ -36,7 +66,15 @@ func handleGetAllProducts(w http.ResponseWriter, _ *http.Request, q *database.Qu
 		})
 	}
 
-	utils.RespondWithJSON(w, http.StatusOK, responseProducts)
+	response := map[string]interface{}{
+		"data":       responseProducts,
+		"page":       page,
+		"limit":      limit,
+		"total_items": totalCount,
+		"total_pages": (int(totalCount) + limit - 1) / limit,
+	}
+
+	utils.RespondWithJSON(w, http.StatusOK, response)
 }
 
 func handleGetProductByID(w http.ResponseWriter, r *http.Request, q *database.Queries) {

@@ -12,7 +12,10 @@ LIMIT 1;
 
 -- name: ListProducts :many
 SELECT * FROM products
-ORDER BY created_at DESC;
+WHERE 
+    (name ILIKE '%' || $3 || '%' OR description ILIKE '%' || $3 || '%') -- Search logic
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
 
 -- name: UpdateProduct :one
 UPDATE products
@@ -36,3 +39,8 @@ RETURNING id;
 DELETE FROM products
 WHERE id = $1
 RETURNING id;
+
+-- name: CountProducts :one
+SELECT COUNT(*) FROM products
+WHERE 
+    (name ILIKE '%' || $1 || '%' OR description ILIKE '%' || $1 || '%');

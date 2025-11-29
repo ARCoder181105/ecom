@@ -13,6 +13,19 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const countProducts = `-- name: CountProducts :one
+SELECT COUNT(*) FROM products
+WHERE 
+    (name ILIKE '%' || $1 || '%' OR description ILIKE '%' || $1 || '%')
+`
+
+func (q *Queries) CountProducts(ctx context.Context, dollar_1 sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countProducts, dollar_1)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO products (
     name, description, image, price, stock_quantity, user_id
@@ -109,11 +122,20 @@ func (q *Queries) GetProductByID(ctx context.Context, id uuid.UUID) (Product, er
 
 const listProducts = `-- name: ListProducts :many
 SELECT id, name, description, image, price, stock_quantity, created_at, user_id FROM products
+WHERE 
+    (name ILIKE '%' || $3 || '%' OR description ILIKE '%' || $3 || '%') -- Search logic
 ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
 `
 
-func (q *Queries) ListProducts(ctx context.Context) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, listProducts)
+type ListProductsParams struct {
+	Limit   int32
+	Offset  int32
+	Column3 sql.NullString
+}
+
+func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
+	rows, err := q.db.QueryContext(ctx, listProducts, arg.Limit, arg.Offset, arg.Column3)
 	if err != nil {
 		return nil, err
 	}
