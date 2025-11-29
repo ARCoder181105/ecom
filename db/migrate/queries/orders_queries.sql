@@ -17,3 +17,16 @@ LIMIT 1;
 SELECT * FROM orders 
 WHERE user_id = $1 
 ORDER BY created_at DESC;
+
+-- name: GetOrderItems :many
+SELECT 
+    oi.id, oi.product_id, oi.quantity, oi.price,
+    p.name as product_name, p.image as product_image
+FROM order_items oi
+JOIN products p ON oi.product_id = p.id
+WHERE oi.order_id = $1;
+
+-- name: UpdateOrderStatus :exec
+UPDATE orders 
+SET status = $2 
+WHERE id = $1;

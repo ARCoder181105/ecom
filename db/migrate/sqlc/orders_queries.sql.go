@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -92,6 +93,54 @@ func (q *Queries) GetOrderByID(ctx context.Context, arg GetOrderByIDParams) (Ord
 	return i, err
 }
 
+const getOrderItems = `-- name: GetOrderItems :many
+SELECT 
+    oi.id, oi.product_id, oi.quantity, oi.price,
+    p.name as product_name, p.image as product_image
+FROM order_items oi
+JOIN products p ON oi.product_id = p.id
+WHERE oi.order_id = $1
+`
+
+type GetOrderItemsRow struct {
+	ID           uuid.UUID
+	ProductID    uuid.UUID
+	Quantity     int32
+	Price        decimal.Decimal
+	ProductName  string
+	ProductImage sql.NullString
+}
+
+func (q *Queries) GetOrderItems(ctx context.Context, orderID uuid.UUID) ([]GetOrderItemsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getOrderItems, orderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetOrderItemsRow
+	for rows.Next() {
+		var i GetOrderItemsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.Price,
+			&i.ProductName,
+			&i.ProductImage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listOrdersByUser = `-- name: ListOrdersByUser :many
 SELECT id, user_id, total_price, status, created_at FROM orders 
 WHERE user_id = $1 
@@ -125,4 +174,20 @@ func (q *Queries) ListOrdersByUser(ctx context.Context, userID uuid.UUID) ([]Ord
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateOrderStatus = `-- name: UpdateOrderStatus :exec
+UPDATE orders 
+SET status = $2 
+WHERE id = $1
+`
+
+type UpdateOrderStatusParams struct {
+	ID     uuid.UUID
+	Status string
+}
+
+func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateOrderStatus, arg.ID, arg.Status)
+	return err
 }

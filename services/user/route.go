@@ -31,10 +31,7 @@ func Routes(db *sql.DB) chi.Router {
 		pr.Get("/profile", func(w http.ResponseWriter, r *http.Request) {
 			handleProfile(w, r, q)
 		})
-
-		// pr.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
-		// 	handleOrders(w, r, q)
-		// })
+		
 	})
 
 	return r

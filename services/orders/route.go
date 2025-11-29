@@ -17,11 +17,20 @@ func Routes(db *sql.DB) chi.Router {
 		r.Use(utils.AuthMiddleware)
 
 		r.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
-			handleUserOrders(w, r, q)
+			handleUserOrdersList(w, r, q)
 		})
 
+		r.Get("/orders/{orderID}", func(w http.ResponseWriter, r *http.Request) {
+			handleGetOrderById(w, r, q)
+		})
+
+		// Need Database transaction
 		r.Post("/placeOrder", func(w http.ResponseWriter, r *http.Request) {
 			handlePlaceOrder(w, r, db)
+		})
+
+		r.Post("/updateOrderStatus", func(w http.ResponseWriter, r *http.Request) {
+			handleAdminUpdateStatus(w, r, q)
 		})
 
 	})

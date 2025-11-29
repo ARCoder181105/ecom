@@ -47,3 +47,8 @@ type CreateOrderPayload struct {
 	ProductID string `json:"product_id"`
 	Quantity  int    `json:"quantity"`
 }
+
+type AdminUpdateStatusPayload struct {
+	OrderID string `json:"order_id"`
+	Status  string    `json:"status"`
+}
