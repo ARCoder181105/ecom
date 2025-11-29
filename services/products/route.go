@@ -22,8 +22,9 @@ func Routes(db *sql.DB) chi.Router {
 		handleGetProductByID(w, r, q)
 	})
 
+	// protected routes
 	r.Group(func(admin chi.Router) {
-		admin.Use(utils.AuthMiddleware) // just make sure only verfied user can delete and update
+		admin.Use(utils.AuthMiddleware) 
 
 		admin.Post("/create", func(w http.ResponseWriter, r *http.Request) {
 			handleCreateProduct(w, r, q)

@@ -57,6 +57,22 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 	return string(ns.UserRole), nil
 }
 
+type Order struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	TotalPrice decimal.Decimal
+	Status     string
+	CreatedAt  time.Time
+}
+
+type OrderItem struct {
+	ID        uuid.UUID
+	OrderID   uuid.UUID
+	ProductID uuid.UUID
+	Quantity  int32
+	Price     decimal.Decimal
+}
+
 type Product struct {
 	ID            uuid.UUID
 	Name          string
