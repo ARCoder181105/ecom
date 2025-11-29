@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/ARCoder181105/ecom/db"
 	"github.com/ARCoder181105/ecom/services/products"
 	"github.com/ARCoder181105/ecom/services/user"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 type APIServer struct {
@@ -34,6 +36,16 @@ func (s *APIServer) Run() error {
 	log.Println("✅ Database connection established")
 
 	r := chi.NewRouter()
+
+	// CORS Configuration
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{os.Getenv("FRONTEND_URL"), "http://localhost:3000", "http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
